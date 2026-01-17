@@ -1,0 +1,68 @@
+version: "3.8"
+
+services:
+  obsbox:
+    image: ghcr.io/neox5/obsbox:latest
+    container_name: alloy-testbench-obsbox
+    volumes:
+      - ./1_simulation/obsbox_ibmmq.yaml:/config/config.yaml:ro
+    networks:
+      - testbench
+    depends_on:
+      - alloy
+
+  alloy:
+    image: docker.io/grafana/alloy:latest
+    container_name: alloy-testbench-alloy
+    volumes:
+      - ./2_collection/config.alloy:/etc/alloy/config.alloy:ro
+    command:
+      - run
+      - /etc/alloy/config.alloy
+      - --server.http.listen-addr=0.0.0.0:12345
+    ports:
+      - "12345:12345"
+      - "4317:4317"
+    networks:
+      - testbench
+    depends_on:
+      - victoriametrics
+
+  victoriametrics:
+    image: docker.io/victoriametrics/victoria-metrics:latest
+    container_name: alloy-testbench-victoriametrics
+    command:
+      - -retentionPeriod=1
+      - -httpListenAddr=:8428
+    ports:
+      - "8428:8428"
+    volumes:
+      - victoriametrics-data:/victoria-metrics-data
+    networks:
+      - testbench
+
+  grafana:
+    image: docker.io/grafana/grafana:latest
+    container_name: alloy-testbench-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./4_grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./4_grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    networks:
+      - testbench
+    depends_on:
+      - victoriametrics
+
+networks:
+  testbench:
+    driver: bridge
+
+volumes:
+  victoriametrics-data:
+  grafana-data:

@@ -1,0 +1,19 @@
+otelcol.receiver.otlp "default" {
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+
+  output {
+    metrics = [otelcol.exporter.prometheus.victoriametrics.input]
+  }
+}
+
+otelcol.exporter.prometheus "victoriametrics" {
+  forward_to = [prometheus.remote_write.victoriametrics.receiver]
+}
+
+prometheus.remote_write "victoriametrics" {
+  endpoint {
+    url = "http://victoriametrics:8428/api/v1/write"
+  }
+}
