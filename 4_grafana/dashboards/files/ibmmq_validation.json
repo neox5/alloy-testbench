@@ -26,7 +26,7 @@
         {
           "refId": "A",
           "expr": "ibmmq_queue_mqput_count_total",
-          "legendFormat": "mqput_total",
+          "legendFormat": "mqput_total (original counter)",
           "interval": "1s",
           "datasource": {
             "type": "prometheus",
@@ -35,8 +35,8 @@
         },
         {
           "refId": "B",
-          "expr": "ibmmq_queue_mqput_rate",
-          "legendFormat": "mqput_rate",
+          "expr": "ibmmq_queue_mqput_rate_accumulated",
+          "legendFormat": "mqput_rate_accumulated (gauge→counter)",
           "interval": "1s",
           "datasource": {
             "type": "prometheus",
@@ -107,24 +107,7 @@
             ]
           }
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "mqput_rate"
-            },
-            "properties": [
-              {
-                "id": "custom.axisPlacement",
-                "value": "right"
-              },
-              {
-                "id": "custom.drawStyle",
-                "value": "bars"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       }
     }
   ],

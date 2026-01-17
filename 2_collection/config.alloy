@@ -1,6 +1,26 @@
+livedebugging {
+  enabled = true
+}
+
 otelcol.receiver.otlp "default" {
   grpc {
     endpoint = "0.0.0.0:4317"
+  }
+
+  output {
+    metrics = [otelcol.processor.transform.accumulate_gauge.input]
+  }
+}
+
+otelcol.processor.transform "accumulate_gauge" {
+  error_mode = "ignore"
+  
+  metric_statements {
+    context = "metric"
+    statements = [
+      `convert_gauge_to_sum("cumulative", true) where name == "ibmmq.queue.mqput.rate"`,
+      `set(name, "ibmmq.queue.mqput.rate.accumulated") where name == "ibmmq.queue.mqput.rate"`,
+    ]
   }
 
   output {
