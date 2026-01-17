@@ -32,8 +32,10 @@ services:
     image: docker.io/victoriametrics/victoria-metrics:latest
     container_name: alloy-testbench-victoriametrics
     command:
-      - -retentionPeriod=1
-      - -httpListenAddr=:8428
+      - -envflag.enable
+      - -envflag.prefix=VM_
+    env_file:
+      - ./3_datasources/victoriametrics.env
     ports:
       - "8428:8428"
     volumes:
