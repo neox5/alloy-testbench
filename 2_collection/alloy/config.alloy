@@ -27,6 +27,10 @@ otelcol.receiver.otlp "default" {
   output {
     metrics = [otelcol.processor.transform.accumulate_gauge.input]
   }
+
+  debug_metrics {
+    disable_high_cardinality_metrics = false
+  }
 }
 
 // ============================================================================
@@ -50,11 +54,19 @@ otelcol.processor.transform "accumulate_gauge" {
   output {
     metrics = [otelcol.processor.deltatocumulative.default.input]
   }
+
+  debug_metrics {
+    disable_high_cardinality_metrics = false
+  }
 }
 
 otelcol.processor.deltatocumulative "default" {
   output {
     metrics = [otelcol.exporter.prometheus.victoriametrics.input]
+  }
+
+  debug_metrics {
+    disable_high_cardinality_metrics = false
   }
 }
 
@@ -93,12 +105,6 @@ prometheus.scrape "alloy_internal" {
 
 prometheus.relabel "alloy_metrics" {
   forward_to = [prometheus.remote_write.alloy_monitoring.receiver]
-
-  rule {
-    source_labels = ["__name__"]
-    regex = "alloy_.*"
-    action = "keep"
-  }
 }
 
 prometheus.remote_write "alloy_monitoring" {
