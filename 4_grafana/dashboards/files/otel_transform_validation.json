@@ -126,7 +126,7 @@
         },
         "showPercentChange": false,
         "textMode": "value_and_name",
-        "wideLayout": true
+        "wideLayout": false
       },
       "pluginVersion": "12.3.1",
       "targets": [
@@ -179,7 +179,7 @@
           "type": "math"
         }
       ],
-      "title": "OTel Transform Validation - Current Values",
+      "title": "",
       "type": "stat"
     },
     {
