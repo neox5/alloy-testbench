@@ -58,14 +58,9 @@ metrics:
 export:
   otel:
     enabled: true
-    host: alloy
+    host: otel-collector
     interval: 100ms
     resource:
       service.name: obsbox
       service.version: 0.1.0
       deployment.environment: development
-
-settings:
-  internal_metrics:
-    enabled: true
-    format: native

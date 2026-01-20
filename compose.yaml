@@ -3,35 +3,28 @@ version: "3.8"
 services:
   obsbox:
     image: ghcr.io/neox5/obsbox:latest
-    container_name: alloy-testbench-obsbox
+    container_name: otel-testbench-obsbox
     volumes:
       - ./1_simulation/obsbox_ibmmq.yaml:/config/config.yaml:ro
     networks:
       - testbench
-    depends_on:
-      - alloy
 
-  alloy:
-    image: docker.io/grafana/alloy:latest
-    container_name: alloy-testbench-alloy
+  otel-collector:
+    image: docker.io/otel/opentelemetry-collector-contrib:latest
+    container_name: otel-testbench-otel-collector
     volumes:
-      - ./2_collection/alloy:/etc/alloy:ro
-    command:
-      - run
-      - /etc/alloy/config.alloy
-      - --server.http.listen-addr=0.0.0.0:12345
-      - --stability.level=experimental
+      - ./2_collection/otel-collector/config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
     ports:
-      - "12345:12345"
-      - "4317:4317"
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "8888:8888" # Metrics endpoint
     networks:
       - testbench
-    depends_on:
-      - victoriametrics
 
   victoriametrics:
     image: docker.io/victoriametrics/victoria-metrics:latest
-    container_name: alloy-testbench-victoriametrics
+    container_name: otel-testbench-victoriametrics
     command:
       - -envflag.enable
       - -envflag.prefix=VM_
@@ -46,7 +39,7 @@ services:
 
   grafana:
     image: docker.io/grafana/grafana:latest
-    container_name: alloy-testbench-grafana
+    container_name: otel-testbench-grafana
     ports:
       - "3000:3000"
     volumes:
@@ -59,8 +52,6 @@ services:
       - GF_AUTH_DISABLE_LOGIN_FORM=true
     networks:
       - testbench
-    depends_on:
-      - victoriametrics
 
 networks:
   testbench:

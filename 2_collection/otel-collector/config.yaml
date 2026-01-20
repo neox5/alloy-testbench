@@ -1,0 +1,72 @@
+# ============================================================================
+# OpenTelemetry Collector Configuration
+# ============================================================================
+# Pipeline: obsbox → OTLP receiver → transform → deltatocumulative →
+#           prometheusremotewrite exporter → VictoriaMetrics
+# ============================================================================
+
+receivers:
+  # OTLP receiver for metrics from obsbox
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # Transform gauge metrics to delta sum
+  transform:
+    error_mode: ignore
+    metric_statements:
+      - context: metric
+        statements:
+          # Convert gauge to delta sum for the rate metric
+          - convert_gauge_to_sum("delta", true) where name == "ibmmq.queue.mqput.rate"
+          # Rename to indicate it's accumulated
+          - set(name, "ibmmq.queue.mqput.rate.accumulated") where name == "ibmmq.queue.mqput.rate"
+
+  # Accumulate delta values to cumulative counter
+  deltatocumulative:
+    max_stale: 5m
+    max_streams: 1000
+
+  # Batch processor for efficiency
+  batch:
+    timeout: 1s
+    send_batch_size: 1000
+
+exporters:
+  # Export to VictoriaMetrics via Prometheus Remote Write
+  prometheusremotewrite:
+    endpoint: http://victoriametrics:8428/api/v1/write
+    tls:
+      insecure: true
+    resource_to_telemetry_conversion:
+      enabled: true
+
+  # Debug exporter for troubleshooting (optional)
+  debug:
+    verbosity: detailed
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [transform, deltatocumulative, batch]
+      exporters: [prometheusremotewrite]
+
+  # Enable telemetry for collector itself
+  telemetry:
+    logs:
+      level: info
+    metrics:
+      level: detailed
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: "0.0.0.0"
+                port: 8888

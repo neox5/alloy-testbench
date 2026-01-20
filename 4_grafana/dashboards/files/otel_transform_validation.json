@@ -179,7 +179,7 @@
           "type": "math"
         }
       ],
-      "title": "",
+      "title": "OTel Transform Validation - Current Values",
       "type": "stat"
     },
     {
@@ -187,7 +187,7 @@
         "type": "prometheus",
         "uid": "victoria_metrics"
       },
-      "description": "",
+      "description": "Validates that gauge aggregation produces equivalent counter (within constant offset)",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -368,7 +368,7 @@
           "refId": "D"
         }
       ],
-      "title": "",
+      "title": "OTel Transform Validation - Time Series",
       "type": "timeseries"
     }
   ],
@@ -385,7 +385,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Alloy Gauge Transform Validation",
-  "uid": "alloy_gauge_transform_validation",
+  "title": "OTel Transform Validation",
+  "uid": "otel_transform_validation",
   "version": 1
 }
