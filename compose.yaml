@@ -37,6 +37,18 @@ services:
     networks:
       - testbench
 
+  loki:
+    image: docker.io/grafana/loki:latest
+    container_name: otel-testbench-loki
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./3_datasources/loki.yaml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - testbench
+
   grafana:
     image: docker.io/grafana/grafana:latest
     container_name: otel-testbench-grafana
@@ -59,4 +71,5 @@ networks:
 
 volumes:
   victoriametrics-data:
+  loki-data:
   grafana-data:
