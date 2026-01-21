@@ -15,14 +15,21 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 processors:
-  # Transform gauge metrics to delta sum
-  transform:
+  # Transform gauge metric to delta sum
+  transform/gauge_to_sum:
     error_mode: ignore
     metric_statements:
       - context: metric
         statements:
           # Convert gauge to delta sum for the rate metric
           - convert_gauge_to_sum("delta", true) where name == "ibmmq.queue.mqput.rate"
+
+  # Rename transformed metric
+  transform/rename:
+    error_mode: ignore
+    metric_statements:
+      - context: metric
+        statements:
           # Rename to indicate it's accumulated
           - set(name, "ibmmq.queue.mqput.rate.accumulated") where name == "ibmmq.queue.mqput.rate"
 
@@ -55,7 +62,8 @@ service:
   pipelines:
     metrics:
       receivers: [otlp]
-      processors: [transform, deltatocumulative, batch]
+      processors:
+        [transform/gauge_to_sum, transform/rename, deltatocumulative, batch]
       exporters: [prometheusremotewrite]
 
   # Enable telemetry for collector itself
