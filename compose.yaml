@@ -9,11 +9,12 @@ services:
     networks:
       - testbench
 
-  otel-collector:
+  otelcol:
     image: docker.io/otel/opentelemetry-collector-contrib:latest
-    container_name: otel-testbench-otel-collector
+    container_name: otel-testbench-otelcol
     volumes:
-      - ./2_collection/otel-collector/config.yaml:/etc/otelcol-contrib/config.yaml:ro
+      - ./2_collection/otelcol/config.yaml:/etc/otelcol-contrib/config.yaml:ro
+      - ${XDG_RUNTIME_DIR}/podman/podman.sock:/run/podman/podman.sock:ro
     command: ["--config=/etc/otelcol-contrib/config.yaml"]
     ports:
       - "4317:4317" # OTLP gRPC

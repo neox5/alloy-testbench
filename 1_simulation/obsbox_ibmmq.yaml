@@ -58,7 +58,7 @@ metrics:
 export:
   otel:
     enabled: true
-    host: otel-collector
+    host: otelcol
     interval: 100ms
     resource:
       service.name: obsbox
