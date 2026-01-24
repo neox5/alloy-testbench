@@ -1,10 +1,10 @@
-# otel-testbench
+# otelbench
 
 A pluggable testbench for developing and validating OpenTelemetry Collector observability pipeline configurations.
 
 ## Overview
 
-otel-testbench orchestrates a complete observability stack using Podman Compose to enable OTel Collector configuration development with controlled, coherent synthetic telemetry.
+otelbench orchestrates a complete observability stack using Podman Compose to enable OTel Collector configuration development with controlled, coherent synthetic telemetry.
 
 **Components:**
 

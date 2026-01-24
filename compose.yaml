@@ -3,15 +3,15 @@ version: "3.8"
 services:
   obsbox:
     image: ghcr.io/neox5/obsbox:latest
-    container_name: otel-testbench-obsbox
+    container_name: otelbench-obsbox
     volumes:
       - ./1_simulation/obsbox_ibmmq.yaml:/config/config.yaml:ro
     networks:
-      - testbench
+      - bench-net
 
   otelcol:
     image: docker.io/otel/opentelemetry-collector-contrib:latest
-    container_name: otel-testbench-otelcol
+    container_name: otelbench-otelcol
     volumes:
       - ./2_collection/otelcol/config.yaml:/etc/otelcol-contrib/config.yaml:ro
       - ${XDG_RUNTIME_DIR}/podman/podman.sock:/run/podman/podman.sock:ro
@@ -21,11 +21,11 @@ services:
       - "4318:4318" # OTLP HTTP
       - "8888:8888" # Metrics endpoint
     networks:
-      - testbench
+      - bench-net
 
   victoriametrics:
     image: docker.io/victoriametrics/victoria-metrics:latest
-    container_name: otel-testbench-victoriametrics
+    container_name: otelbench-victoriametrics
     command:
       - -envflag.enable
       - -envflag.prefix=VM_
@@ -36,11 +36,11 @@ services:
     volumes:
       - victoriametrics-data:/victoria-metrics-data
     networks:
-      - testbench
+      - bench-net
 
   loki:
     image: docker.io/grafana/loki:latest
-    container_name: otel-testbench-loki
+    container_name: otelbench-loki
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - ./3_datasources/loki.yaml:/etc/loki/local-config.yaml:ro
@@ -48,11 +48,11 @@ services:
     ports:
       - "3100:3100"
     networks:
-      - testbench
+      - bench-net
 
   grafana:
     image: docker.io/grafana/grafana:latest
-    container_name: otel-testbench-grafana
+    container_name: otelbench-grafana
     ports:
       - "3000:3000"
     volumes:
@@ -64,10 +64,10 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_AUTH_DISABLE_LOGIN_FORM=true
     networks:
-      - testbench
+      - bench-net
 
 networks:
-  testbench:
+  bench-net:
     driver: bridge
 
 volumes:
