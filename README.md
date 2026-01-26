@@ -11,6 +11,7 @@ otelbench orchestrates a complete observability stack using Podman Compose to en
 - **obsbox** - Generates coherent synthetic telemetry signals
 - **OpenTelemetry Collector** - Observability data pipeline under test
 - **VictoriaMetrics** - Time-series metric storage
+- **Loki** - Log aggregation system
 - **Grafana** - Metric visualization and validation
 
 ## Use Case
@@ -23,6 +24,7 @@ Validate OTel Collector transformation correctness without production infrastruc
 
 ```
 obsbox (OTLP) → OTel Collector Chain (OTLP) → VictoriaMetrics (Prometheus Remote Write) → Grafana (HTTP)
+                                              → Loki (OTLP)                            → Grafana (HTTP)
 ```
 
 All components run in containers with simple bridge networking. Fresh data on each run ensures reproducible tests.
@@ -33,12 +35,43 @@ All components run in containers with simple bridge networking. Fresh data on ea
 
 - Core pipeline operational with transform and deltatocumulative processors
 - Metrics validation dashboard active
-- Loki integration pending
+- Loki integration complete
+- Self-monitoring in progress
 
 ## Requirements
 
 - Podman + Podman Compose
 - Linux host with container runtime support
+
+### Podman Socket Setup
+
+The OTel Collector's `podman_stats` receiver requires access to the Podman socket for container metrics:
+
+```bash
+# Activate Podman socket (user session)
+systemctl --user enable --now podman.socket
+
+# Set socket permissions (required for container access)
+sudo chmod 666 $XDG_RUNTIME_DIR/podman/podman.sock
+```
+
+**Platform Compatibility:**
+
+- **Arch Linux (bare metal)**: Full support with above setup
+- **WSL2/Ubuntu**: Not functional - podman_stats receiver incompatible with WSL2 environment
+
+Note: Container metrics collection will be unavailable on WSL2/Ubuntu. Application metrics (obsbox telemetry) remain fully functional.
+
+**Known Issue - WSL2/Ubuntu:**
+
+The `podman_stats` receiver cannot collect container statistics in WSL2 environments due to cgroups v2 requirements. The error `"No stats found"` is expected behavior. This limitation does not affect the core testbench functionality:
+
+- ✅ Application metrics (obsbox → OTel Collector → VictoriaMetrics) work normally
+- ✅ Transformation validation works normally
+- ✅ All dashboards except container resource table function correctly
+- ❌ Container metrics table will remain empty
+
+To eliminate error logs in WSL2, you can remove the `podman_stats` receiver configuration from `2_collection/otelcol/config.yaml` and remove the `metrics/container` pipeline from the service configuration.
 
 ## License
 
